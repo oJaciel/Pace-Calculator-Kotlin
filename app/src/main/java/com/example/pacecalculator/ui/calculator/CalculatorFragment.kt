@@ -68,15 +68,27 @@ class CalculatorFragment : Fragment() {
         //Calculando o pace
         val pace = time / distance
 
-        //FALTA FAZER
-        //Tratar os segundos do pace separado dos minutos
-        //Mostrar bonitinho na tela = 0:00 / km
+
+        //Tratando os segundos do pace separado dos minutos
+        //totalSeconds calcula o total de segundos multiplicando o pace por 60
+        val totalSeconds = (pace * 60).toInt()
+        //paceMinutes calcula os minutos dividindo o total de segundos por 60
+        val paceMinutes = totalSeconds / 60
+        //paceSeconds calcula os segundos restantes usando o operador % (módulo)
+        //Assim, os segundos sempre são um valor positivo, entre 0 e 59
+        val paceSeconds = totalSeconds % 60
+        //Formatando os segundos, para aparecer sempre duas casas no número
+        val formattedPaceSeconds = "%02d".format(paceSeconds)
+
+
+        //Mostrando pace na tela
+        txtResult.setText(paceMinutes.toString() + ":" + formattedPaceSeconds + " min/km")
+
+
         //Mostrar também a distância mais bonitinho dps de calcular = 0,00 km
         //Mostrar o tempo bonitinho dps de calcular = 0h 00min 00s
 
         txtSetResult.setText("Seu pace é:")
-
-        txtResult.setText(pace.toString())
 
         imgResult.setImageResource(R.drawable.ic_pace);
 
