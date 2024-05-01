@@ -1,6 +1,7 @@
 package com.example.pacecalculator.ui.calculator
 
-import android.net.Uri
+import android.content.Context.MODE_PRIVATE
+import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,9 @@ import com.example.pacecalculator.R
 import com.example.pacecalculator.databinding.FragmentCalculatorBinding
 
 class CalculatorFragment : Fragment() {
+
+    //Criando variável para o banco
+    private lateinit var databaseApp : SQLiteDatabase
 
     //Gerando variáveis para elementos do layout da calculadora
     private lateinit var edtTime: EditText
@@ -39,6 +43,7 @@ class CalculatorFragment : Fragment() {
         _binding = FragmentCalculatorBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+
         //Captando as variáveis do layout
         edtTime = binding.edtTime
         edtDistance = binding.edtDistance
@@ -53,9 +58,49 @@ class CalculatorFragment : Fragment() {
             calculatePace()
         }
 
+        //Criando / abrindo o banco
+        createDatabase()
+
         return root
     }
 
+    fun createDatabase() {
+        try {
+            databaseApp = requireContext().openOrCreateDatabase("dbPaceCalculator", MODE_PRIVATE, null)
+
+            databaseApp.execSQL("CREATE TABLE IF NOT EXISTS calculateResults" +
+                    "(id INTEGER PRIMARY KEY AUTOINCREMENT, pace TEXT, time TIME, kilometers FLOAT)")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+    }
+
+    fun save() {
+        try {
+            val paceDB = txtResult.text.toString()
+
+            val timeDB = getTime()
+
+            val kilometersDB = getDistance()
+
+            //Abrindo o banco
+            databaseApp = requireContext().openOrCreateDatabase("dbPaceCalculator", MODE_PRIVATE, null)
+            //Fazendo statement para adicionar os dados
+            val sql = "INSERT INTO calculateResults (pace, time, kilometers) VALUES (?, ?, ?)"
+            val stmt = databaseApp.compileStatement(sql)
+            stmt.bindString(1,paceDB)
+            stmt.bindDouble(2,timeDB)
+            stmt.bindDouble(3,kilometersDB)
+
+            stmt.executeInsert()
+
+            databaseApp.close()
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
 
     fun calculatePace() {
@@ -92,6 +137,8 @@ class CalculatorFragment : Fragment() {
 
         imgResult.setImageResource(R.drawable.ic_pace);
 
+
+        save()
     }
 
     //Variável para captar e tratar a distância
